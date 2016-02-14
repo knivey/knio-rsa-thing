@@ -17,6 +17,10 @@ using namespace std;
 <Knio>     if g != 1:
 <Knio>       print('%d %d' % (g, n))
 */
+/*
+<Knio> i7 4790K
+<Knio> FOUR GIGLEHURTZ
+*/
 
 int main(int argc, char *argv[])
 {
@@ -46,7 +50,7 @@ int main(int argc, char *argv[])
 			allkeys.emplace(allkeys.end(), key, 16);
 		}
 		if (allkeys.back() == 0) {
-			cout << "Opps looks like a key == 0 failing horribly now" << endl;
+			cout << "Oops looks like a key == 0 failing horribly now" << endl;
 			return 1;
 		}
 	}
@@ -55,7 +59,7 @@ int main(int argc, char *argv[])
 	cout << "Multiplying all keys together. . ." << endl;
 
 	int c = 0;
-	for each (n in allkeys)
+	for(n : allkeys)
 	{
 		cout << "\r";
 		p *= n;
@@ -69,7 +73,7 @@ int main(int argc, char *argv[])
 
 	mpz_class t;
 	c = 0;
-	for each (n in allkeys)
+	for(n : allkeys)
 	{
 		cout << "\r";
 		t = p / n;
@@ -85,3 +89,4 @@ int main(int argc, char *argv[])
 	cout << endl << "Goodbye." << endl;
 	return 0;
 }
+
