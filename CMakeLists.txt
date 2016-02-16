@@ -1,11 +1,10 @@
 project(knio-rsa-thing)
 cmake_minimum_required(VERSION 2.8)
 aux_source_directory(. SRC_LIST)
-
+set(CMAKE_FIND_LIBRARY_SUFFIXES ".a")
 INCLUDE_DIRECTORIES("/mpir/include/")
 LINK_DIRECTORIES("/mpir/lib")
-
 set(CMAKE_CXX_FLAGS "-std=c++17 ${CMAKE_CXX_FLAGS}")
-
+set(CMAKE_EXE_LINKER_FLAGS "-static-libgcc -static-libstdc++ -static")
 add_executable(${PROJECT_NAME} ${SRC_LIST})
 target_link_libraries(${PROJECT_NAME} mpir mpirxx)
