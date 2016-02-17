@@ -73,12 +73,12 @@ void gcd_worker(vector<mpz_class>& q, mpz_class& p, size_t offset, size_t stride
 	mpz_class g;
 	const auto len = q.size();
 	unsigned int lc = 0;
+	mpz_class t;
 	while (offset < len) {
-		mpz_class n = q[offset];
-		mpz_class t = p / n;
-		mpz_gcd(g.get_mpz_t(), t.get_mpz_t(), n.get_mpz_t());
+		t = p / q[offset];
+		mpz_gcd(g.get_mpz_t(), t.get_mpz_t(), q[offset].get_mpz_t());
 		if (g != 1) {
-			cout << endl << "G: " << g.get_str(16) << " N: " << n.get_str(16) << endl;
+			cout << endl << "G: " << g.get_str(16) << " N: " << q[offset].get_str(16) << endl;
 		}
 		offset += stride;
 		lc++;
