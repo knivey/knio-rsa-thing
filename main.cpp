@@ -100,7 +100,6 @@ int main(int argc, char *argv[])
 	cout << "Multiplying all keys together. . ." << endl;
 
 
-#if 1
 	mpz_class results[N];
 	atomic<unsigned int> count(1);
 	atomic<unsigned int> total(allkeys.size());
@@ -118,18 +117,7 @@ int main(int argc, char *argv[])
 	}
 
 	progress_thread.join();
-#else
-	int c = 0;
-	for(n : allkeys)
-	{
-		cout << "\r";
-		p *= n;
-		c++;
-		if ((c % 1000) == 0) {
-			cout << c << " keys multiplied";
-		}
-	}
-#endif
+
 	cout << endl;
 	cout << "Doing gcd thing. . ." << endl;
 
