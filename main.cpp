@@ -4,6 +4,8 @@
 #include <vector>
 #include <thread>
 #include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 using namespace std;
 
@@ -25,40 +27,69 @@ using namespace std;
 <Knio> FOUR GIGLEHURTZ
 */
 
-void progress(atomic<unsigned int>& count, atomic<unsigned int>& total) {
-	cout << endl;
+condition_variable cv;
+mutex m;
+bool flaggy = false;
+
+void progress(unsigned int &count, unsigned int total) {
 	do {
+		{
+			unique_lock<mutex> lk(m);
+			cv.wait(lk, []{return flaggy;});
+			flaggy = false;
+		}
 		cout << "\r";
 		cout << (count * 100) / total << "% (" << count << "/" << total << ")";
+		cout.flush();
 	} while (count != total);
 	cout << endl;
 }
 
-void multiply_worker(vector<mpz_class>& q, size_t offset, size_t stride, mpz_class& result, atomic<unsigned int>& c) {
+void incCount(unsigned int &c, unsigned int amount)
+{
+	lock_guard<mutex> lk(m);
+	c += amount;
+	flaggy = true;
+	cv.notify_all();
+}
+
+void multiply_worker(vector<mpz_class>& q, size_t offset, size_t stride, mpz_class& result, unsigned int &c) {
 	mpz_class p = 1;
 	const auto len = q.size();
+	unsigned int lc = 0;
 	while (offset < len) {
 		p *= q[offset];
 		offset += stride;
-		c++;
+		lc++;
+		if(lc == 10) {
+			incCount(c, lc);
+			lc = 0;
+		}
 	}
 
+	incCount(c, lc);
 	result = p;
 }
 
-void gcd_worker(vector<mpz_class>& q, mpz_class& p, size_t offset, size_t stride, atomic<unsigned int>& c) {
+void gcd_worker(vector<mpz_class>& q, mpz_class& p, size_t offset, size_t stride, unsigned int &c) {
 	mpz_class g;
 	const auto len = q.size();
+	unsigned int lc = 0;
 	while (offset < len) {
 		mpz_class n = q[offset];
 		mpz_class t = p / n;
 		mpz_gcd(g.get_mpz_t(), t.get_mpz_t(), n.get_mpz_t());
 		if (g != 1) {
-			cout << "G: " << g.get_str(16) << " N: " << n.get_str(16) << endl;
+			cout << endl << "G: " << g.get_str(16) << " N: " << n.get_str(16) << endl;
 		}
 		offset += stride;
-		c++;
+		lc++;
+		if(lc == 10) {
+			incCount(c, lc);
+			lc = 0;
+		}
 	}
+	incCount(c, lc);
 }
 
 int main(int argc, char *argv[])
@@ -101,10 +132,10 @@ int main(int argc, char *argv[])
 
 
 	mpz_class results[N];
-	atomic<unsigned int> count(1);
-	atomic<unsigned int> total(allkeys.size());
+	unsigned int count(0);
+	unsigned int total(allkeys.size());
 
-	thread progress_thread(progress, ref(count), ref(total));
+	thread progress_thread(progress, ref(count), total);
 
 	for (int i = 0; i < N; ++i) {
 		threads.push_back(thread(multiply_worker, ref(allkeys), i, N, ref(results[i]), ref(count)));
@@ -121,8 +152,8 @@ int main(int argc, char *argv[])
 	cout << endl;
 	cout << "Doing gcd thing. . ." << endl;
 
-	atomic<unsigned int> count2(1);
-	progress_thread = thread(progress, ref(count2), ref(total));
+	unsigned int count2(0);
+	progress_thread = thread(progress, ref(count2), total);
 
 	threads.clear();
 
