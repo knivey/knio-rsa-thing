@@ -9,9 +9,7 @@
 
 using namespace std;
 
-#pragma warning(disable: 4146 4244 4800)
 #include <mpirxx.h>
-#pragma warning(default: 4146 4244 4800)
 
 /*
 <Knio>   p = 1
